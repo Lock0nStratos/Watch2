@@ -80,6 +80,8 @@ public class HeartActivity extends AppCompatActivity {
     private TextView tv_name;
     private SimpleDateFormat sdf;
     private Date d;
+    private float mx,my,mz;
+    private int move_count;
     private SensorEventListener myhertSensorListener = new SensorEventListener() {
         //传感器的值改变调用此方法
         @Override
@@ -97,11 +99,66 @@ public class HeartActivity extends AppCompatActivity {
         }
     };
 
+    private SensorEventListener myAccelerateSensorListener = new SensorEventListener() {
+        //传感器的值改变调用此方法
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+            String data_a="x："+x+"  y："+y+"  z："+z;
+            Message message=a.obtainMessage();
+            message.obj=data_a;
+            a.sendMessage(message);
 
+            if ((Math.pow((x-mx),2)+Math.pow((y-my),2)+Math.pow((z-mz),2)>6)){
+                b.sendEmptyMessage(1);
+            }else {
+                b.sendEmptyMessage(0);
+            }
+
+            mx=x;my=y;mz=z;
+        }
+
+        //传感器的精确度改变调用此方法
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    };
+
+    Handler b=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            int what=msg.what;
+            if (what==1){
+                tv_move.setText("运动");
+                Vibrate(400);
+                move_count++;
+            }
+            else if (what==0){
+                tv_move.setText("静止");
+            }
+            else if (what==2){
+                tv_move.setText("长时间未活动");
+                Vibrate(1000);
+                Toast.makeText(HeartActivity.this,"长时间未活动",Toast.LENGTH_LONG).show();
+            }
+        }
+    };
+
+    Timer move_timer=new Timer();
 
     private SensorManager sm;
     private WebSocketUtil webSocket;
     Timer t;
+    Handler a=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            String s=msg.obj.toString();
+            tv_accelerate.setText(s);
+        }
+    };
     Handler h = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -115,6 +172,7 @@ public class HeartActivity extends AppCompatActivity {
         }
     };
 
+
     Timer heart_timer=new Timer();
 
 
@@ -125,11 +183,14 @@ public class HeartActivity extends AppCompatActivity {
     private MediaRecorder mRecorder;
     private MediaPlayer mPlayer;
     private TextView tv_helper;
+    private TextView tv_accelerate;
+    private TextView tv_move;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heart);
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         deviceid = getIntent().getStringExtra("name");
         SKYBeaconManager.getInstance().init(this);
@@ -138,6 +199,7 @@ public class HeartActivity extends AppCompatActivity {
         initView();
         voiceinit();
         initHeart();
+        initAccelerate();
         initwebsocket();
         initloc();
         new Thread(){
@@ -186,6 +248,18 @@ public class HeartActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        move_timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (move_count==0){
+//                    Toast.makeText(HeartActivity.this,"长时间未活动",Toast.LENGTH_SHORT).show();
+                    b.sendEmptyMessage(2);
+                }else {
+                    move_count=0;
+                }
+            }
+        },0,10000);
     }
 
     public static boolean createFileByInputStream(InputStream inputStream, String outputFileName) throws IOException {
@@ -492,6 +566,12 @@ public class HeartActivity extends AppCompatActivity {
 
     }
 
+    private void initAccelerate(){
+        sm = (SensorManager) this.getSystemService(SENSOR_SERVICE);
+        Sensor defaultSensor = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sm.registerListener(myAccelerateSensorListener,defaultSensor,SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
     private PowerManager.WakeLock mWakeLock;
 
     private void initView() {
@@ -506,6 +586,10 @@ public class HeartActivity extends AppCompatActivity {
         tv_heart = (TextView) findViewById(R.id.tv_heart);
         tv_time = (TextView) findViewById(R.id.tv_time);
         tv_name = (TextView) findViewById(R.id.tv_name);
+
+        tv_accelerate=(TextView)findViewById(R.id.tv_accelerate);
+        tv_move=(TextView)findViewById(R.id.tv_move);
+
         ImageView img_setting = (ImageView) findViewById(R.id.setting);
         img_setting.setOnClickListener(new View.OnClickListener() {
             @Override

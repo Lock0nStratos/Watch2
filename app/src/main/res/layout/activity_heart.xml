@@ -116,6 +116,24 @@
                 android:textColor="@color/color_text"
                 android:textSize="30px"/>
 
+            <TextView
+                android:id="@+id/tv_accelerate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Accelerate"
+                android:textColor="@color/color_text"
+                android:textSize="30px"/>
+
+            <TextView
+                android:id="@+id/tv_move"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="静止"
+                android:textColor="@color/color_text"
+                android:textSize="130px"/>
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -127,8 +145,8 @@
 
                 <ImageView
                     android:id="@+id/img_talk"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
                     android:layout_marginTop="10px"
                     android:scaleType="fitXY"
                     android:src="@drawable/img_bg_inspection_result_rec"
@@ -137,8 +155,8 @@
 
                 <TextView
                     android:id="@+id/tv_helper"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
                     android:layout_marginTop="10px"
                     android:background="@drawable/tv_shap"
                     android:text="SOS"
@@ -148,8 +166,8 @@
 
                 <ImageView
                     android:id="@+id/setting"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
                     android:layout_marginTop="10px"
                     android:scaleType="fitXY"
                     android:src="@mipmap/set"
